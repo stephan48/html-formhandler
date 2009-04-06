@@ -193,14 +193,6 @@ this to work.
 
 =cut
 
-has 'field_list' => ( isa => 'HashRef', is => 'rw', default => sub { {} } );
-
-=head2 fields
-
-The field definitions as built from the field_list and the 'has_field'
-declarations. This is a MooseX::AttributeHelpers::Collection::Array, 
-and provides clear_fields, add_field, remove_last_field, num_fields,
-has_fields, and set_field_at methods.
 
 =head2 name
 
@@ -220,6 +212,9 @@ has 'name' => (
    is      => 'rw',
    default => sub { return 'form' . int( rand 1000 ) }
 );
+
+has 'form_name' => ( isa => 'Str', lazy => 1, default => sub { shift->name } );
+has '+is_top_level' => ( default => 1 );
 
 
 =head2 init_object
@@ -266,21 +261,6 @@ Flag to print out additional diagnostic information. See 'dump_fields' and
 
 has [ 'ran_validation', 'validated', 'verbose' ] => ( isa => 'Bool', is => 'rw' );
 
-=head2 field_name_space
-
-Use to set the name space used to locate fields that 
-start with a "+", as: "+MetaText". Fields without a "+" are loaded
-from the "HTML::FormHandler::Field" name space. If 'field_name_space'
-is not set, then field types with a "+" must be the complete package
-name.
-
-=cut
-
-has 'field_name_space' => (
-   isa     => 'Str|Undef',
-   is      => 'rw',
-   default => '',
-);
 
 =head2 num_errors
 
@@ -336,14 +316,6 @@ sub build_language_handle
 
 Used for numbering fields. Used by set_order method in Field.pm. 
 Useful in templates.
-
-=cut
-
-has 'field_counter' => (
-   isa     => 'Int',
-   is      => 'rw',
-   default => 1
-);
 
 =head2 html_prefix
 

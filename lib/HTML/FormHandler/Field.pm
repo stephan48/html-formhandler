@@ -252,25 +252,6 @@ Field's css_class for use in templates.
 
 has 'css_class' => ( isa => 'Str', is => 'rw' );
 
-=head2 sub_form
-
-The field is made up of a sub-form.
-
-A single field can be represented by multiple sub-fields
-contained in a form.  This is a reference to that form.
-
-=cut
-
-has 'sub_form' => ( isa => 'HTML::FormHandler', is => 'rw' );
-
-=head2 form
-
-A reference to the containing form.
-
-=cut
-
-has 'form' => ( isa => 'HTML::FormHandler', is => 'rw', weak_ref => 1 );
-
 =head2 prename
 
 Field name prefixed by the form name and a dot.
@@ -291,7 +272,7 @@ has 'prename' => (
 sub build_prename
 {
    my $self = shift;
-   my $prefix = $self->form ? $self->form->name . "." : '';
+   my $prefix = $self->form_name ? $self->form_name . "." : '';
    return $prefix . $self->name;
 }
 
@@ -443,9 +424,9 @@ has 'id' => ( isa => 'Str', is => 'rw', lazy => 1, builder => 'build_id' );
 
 sub build_id
 {
-   my $field = shift;
-   my $form_name = $field->form ? $field->form->name : 'fld-';
-   return $form_name . $field->name;
+   my $self = shift;
+   my $form_name = $self->form_name ? $self->form_name : 'fld-';
+   return $form_name . $self->name;
 }
 
 =head2 javascript
@@ -596,11 +577,10 @@ when displaying the field.
 
 sub set_order
 {
-   my $field = shift;
-   my $form  = $field->form;
-   my $order = $form->field_counter || 1;
-   $field->order($order);
-   $form->field_counter( $order + 1 );
+   my $self = shift;
+   my $order = $self->parent->field_counter || 1;
+   $self->order($order);
+   $self->parent->field_counter( $order + 1 );
 }
 
 =head2 add_error
@@ -613,28 +593,22 @@ See $form->language_handle for details. Returns undef.
 
 =cut
 
+
+has 'language_handle' => ( is      => 'rw' );
+
 sub add_error
 {
    my $self = shift;
 
-   my $form = $self->form;
-   my $lh;
-   # By default errors get attached to the field where they happen.
-   my $error_field = $self;
-   # Running without a form object?
-   if ($form)
-   {
-      $lh = $form->language_handle;
-      # If we are a sub-form then redirect errors to the parent field
-      $error_field = $form->parent_field if $form->parent_field;
-   }
-   else
-   {
-      $lh = $ENV{LANGUAGE_HANDLE}
+   # get language handle
+   my $lh = $self->language_handle
+         || $ENV{LANGUAGE_HANDLE}
          || HTML::FormHandler::I18N->get_handle
          || die "Failed call to Locale::Maketext->get_handle";
-   }
-   $error_field = $self->parent_field if $self->errors_on_parent;
+   # By default errors get attached to the field where they happen.
+   my $error_field = $self;
+   $error_field = $self->parent 
+          if ( $self->errors_on_parent && !$self->is_top_level );
    $error_field->push_errors( $lh->maketext(@_) );
    return;
 }

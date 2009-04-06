@@ -40,12 +40,6 @@ Widget type is 'compound'
 
 has '+widget' => ( default => 'compound' );
 
-sub BUILD
-{
-   my $self = shift;
-   $self->build_fields;
-}
-
 augment 'validate_field' => sub {
    my $self = shift;
    $self->clear_fif;

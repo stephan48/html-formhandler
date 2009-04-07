@@ -540,6 +540,9 @@ has 'validate_meth' => ( isa => 'Str', is => 'rw', lazy => 1,
     }
 );
 
+has 'my_init' => ( isa => 'Coderef', is => 'rw' );
+has 'my_options' => ( isa => 'Coderef', is => 'rw' );
+has 'my_validate' => ( isa => 'Coderef', is => 'rw' );
 
 =head1 METHODS
 

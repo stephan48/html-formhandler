@@ -41,7 +41,6 @@ sub render_start
    my $output = '<form ';
    $output .= 'action="' . $self->action . '" ' if $self->action;
    $output .= 'id="' . $self->name . '" ' if $self->name;
-   $output .= 'name="' . $self->name . '" ' if $self->name;
    $output .= 'method="' . $self->http_method . '"' if $self->http_method;
    $output .= '>' . "\n";
    $output .= "<table>\n";
